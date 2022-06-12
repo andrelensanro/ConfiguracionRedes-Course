@@ -1,0 +1,273 @@
+## configuracion de direccionamiento con VLSM
+## configuracion de las ips estaticas de los servidores 
+--------------------COMANDOS NECESARIOS--------------------
+no int g0/1.20
+no int g0/1.30
+do show run
+show run
+show vlans brief
+no ip nat inside
+ip nat inside
+do show vlan
+---------------------SERVIDORES----------------------------
+VLAN 20 ADMINISTRADORES
+SERVIDOR DNS 172.16.160.120/25 GW 172.16.160.1
+SERVIDOR DHCP-HTTP 172.16.180.230/22 GW 172.16.180.1
+SERVIDOR SNMP-TFTP 172.16.184.230/22 GW 172.16.184.1
+
+---------------------ROUTER 2------------------------------
+int g0/1
+no shutdown
+int g0/1.10
+encapsulation dot1q 10
+ip addr 172.16.112.1 255.255.254.0
+no shutdown
+int g0/1.20
+encapsulation dot1q 20
+ip addr 172.16.16.1 255.255.252.0
+no shutdown
+int g0/1.30
+encapsulation dot1q 30
+ip addr 172.16.32.1 255.255.252.0
+no shutdown
+int g0/0
+ip addr 172.16.160.129 255.255.255.252
+no shutdown
+
+
+VLAN 10 ACL EXT. (INVITADOS)
+-INVITADOS solo se pueden comunicar con otras areas de INVITADOS
+# Creamos las acl
+# Denegamos que la vlan 10 llegue a la vlan 20
+access-list 101 deny ip 172.16.112.0 0.0.1.255 172.16.16.0 0.0.3.255
+# Denegamos que la vlan 10 llegue a la vlan 30
+access-list 101 deny ip 172.16.112.0 0.0.1.255 172.16.32.0 0.0.3.255
+# Denegamos que la vlan 10 llegue a la vlan 20 - amarillo
+access-list 101 deny ip 172.16.112.0 0.0.1.255 172.16.48.0 0.0.3.255
+# Denegamos que la vlan 10 llegue a la vlan 30 - amarillo
+access-list 101 deny ip 172.16.112.0 0.0.1.255 172.16.64.0 0.0.3.255
+# Denegamos que la vlan 10 llegue a la vlan 20 - rojo
+access-list 101 deny ip 172.16.112.0 0.0.1.255 172.16.80.0 0.0.3.255
+# Denegamos que la vlan 10 llegue a la vlan 30 - rojo
+access-list 101 deny ip 172.16.112.0 0.0.1.255 172.16.96.0 0.0.3.255
+# Denegamos que la vlan 10 llegue a la vlan 20 - verde (1)
+access-list 101 deny ip 172.16.112.0 0.0.1.255 172.16.160.0 0.0.0.128
+# Denegamos que la vlan 10 llegue a la vlan 20 - verde (2)
+access-list 101 deny ip 172.16.112.0 0.0.1.255 172.16.180.0 0.0.3.255
+# Denegamos que la vlan 10 llegue a la vlan 20 - verde (3)
+access-list 101 deny ip 172.16.112.0 0.0.1.255 172.16.184.0 0.0.3.255
+
+# Permitimos la comunicacion de los invitados de las redes amarillo, rojo
+access-list 101 permit ip any any
+
+# Aplicamos la acl
+int g0/1.10
+ip access-group 101 in
+
+VLAN 20 ACL EXT. (ADMINISTRADORES)
+- ADMINISTRADORES se pueden comunicar con todos los demas administradores EXCEPTO con los SERVIDORES
+# Denegamos que la vlan 20 llegue a la vlan 30
+access-list 102 deny ip 172.16.16.0 0.0.3.255 172.16.32.0 0.0.3.255
+# Denegamos que la vlan 20 llegue a la vlan 30 - amarillo
+/access-list 102 deny ip 172.16.16.0 0.0.3.255 172.16.64.0 0.0.3.255
+# Denegamos que la vlan 20 llegue a la vlan 30 - rojo
+/access-list 102 deny ip 172.16.16.0 0.0.3.255 172.16.96.0 0.0.3.255
+
+# Denegamos que la vlan 20 llegue al SERVIDOR DNS
+access-list 102 permit dns 172.16.16.0 0.0.3.255 172.16.160.230 0.0.0.0
+
+# Permitimos que la vlan 20 llegue al SERVIDOR DHCP-HTTP
+access-list 102 permit dns 172.16.16.0 0.0.3.255 172.16.180.230 0.0.0.0
+
+# Permitir que la vlan 20 llegue al SERVIDOR SNMP-TFTP
+access-list 102 permit dns 172.16.16.0 0.0.3.255 172.16.184.230 0.0.0.0
+
+
+--------------------------
+
+-------------------------
+access-list 102 permit ip any any
+
+# Aplicamos la acl
+int g0/1.20
+ip access-group 102 in
+
+-VLAN 30 ACL EXT. (LABORATORIOS)
+# Denegamos que la vlan 30 llegue al SERVIDOR DNS
+/access-list 103 deny ip 172.16.32.0 0.0.3.255 172.16.160.230 0.0.0.0
+# Denegamos que la vlan 30 llegue al SERVIDOR DHCP-HTTP
+/access-list 103 deny ip 172.16.32.0 0.0.3.255 172.16.180.230 0.0.0.0
+# Denegamos que la vlan 30 llegue al SERVIDOR SNMP-TFTP
+/access-list 103 deny ip 172.16.32.0 0.0.3.255 172.16.184.230 0.0.0.0
+access-list 103 permit ip any any
+
+# Aplicamos la acl
+int g0/1.30
+ip access-group 103 in
+
+
+---------------------SWITCH 2---------------------
+vlan 10
+name invitado
+ex
+vlan 20
+name administracion
+ex
+vlan 30
+name laboratorio
+ex
+
+
+int e0/1
+switchport mode access
+switchport access vlan 30
+int e0/2
+switchport mode access
+switchport access vlan 20
+int e0/3
+switchport mode access
+switchport access vlan 10
+int e0/0
+switchport trunk allowed vlan 10 20 30 (all)
+switchport trunk encapsulation dot1q
+switchport mode trunk
+---------------------PCs---------------------
+PC 1 
+ip 172.16.112.5/23 172.16.112.1
+
+PC 2
+ip 172.16.16.5/22 172.16.16.1
+
+PC 3
+ip 172.16.32.5/22 172.16.32.1
+
+
+*********************************************CORRECCION DE LAS ACL*********************************
+-------------------------------ROUTER 2 .112.0 -------------------------------------------------
+
+conf t
+#dns
+access-list 101 permit udp 172.16.112.0 0.0.1.255 host 172.16.160.120 eq domain
+#dhcp
+access-list 101 permit udp 172.16.112.0 0.0.1.255 host 172.16.180.120 eq 67
+#snmp
+access-list 101 permit udp 172.16.112.0 0.0.1.255 host 172.16.184.120 eq snmp
+#tftp
+access-list 101 permit udp 172.16.112.0 0.0.1.255 host 172.16.180.120 eq tftp
+#dns
+access-list 101 permit icmp 172.16.112.0 0.0.1.255 host 172.16.160.120
+#dhcp
+access-list 101 permit icmp 172.16.112.0 0.0.1.255 host 172.16.180.120
+#snmp
+access-list 101 permit icmp 172.16.112.0 0.0.1.255 host 172.16.184.120
+
+access-list 101 deny ip 172.16.112.0 0.0.1.255 172.16.16.0 0.0.3.255
+access-list 101 deny ip 172.16.112.0 0.0.1.255 172.16.32.0 0.0.3.255
+# Denegamos que la vlan 10 llegue a la vlan 20 - amarilla
+access-list 101 deny ip 172.16.112.0 0.0.1.255 172.16.48.0 0.0.3.255
+# Denegamos que la vlan 10 llegue a la vlan 30 - amarilla
+access-list 101 deny ip 172.16.112.0 0.0.1.255 172.16.64.0 0.0.3.255
+# Denegamos que la vlan 10 llegue a la vlan 20 - rojo
+access-list 101 deny ip 172.16.112.0 0.0.1.255 172.16.80.0 0.0.3.255
+# Denegamos que la vlan 10 llegue a la vlan 30 - rojo
+access-list 101 deny ip 172.16.112.0 0.0.1.255 172.16.96.0 0.0.3.255
+# Denegamos que la vlan 10 llegue a la vlan 20 - verde (1)
+access-list 101 deny ip 172.16.112.0 0.0.1.255 172.16.160.0 0.0.0.127
+# Denegamos que la vlan 10 llegue a la vlan 20 - verde (2)
+access-list 101 deny ip 172.16.112.0 0.0.1.255 172.16.180.0 0.0.3.255
+# Denegamos que la vlan 10 llegue a la vlan 20 - verde (3)
+access-list 101 deny ip 172.16.112.0 0.0.1.255 172.16.184.0 0.0.3.255
+access-list 101 permit ip any any
+
+
+end 
+
+conf t
+
+int g0/1.10
+ip access-group 101 in
+
+-------------------------------ROUTER 2 .16.0 -------------------------------------------------
+conf t
+
+#dns
+access-list 102 permit udp 172.16.16.0 0.0.3.255 host 172.16.160.120 eq domain
+#dhcp
+access-list 102 permit udp 172.16.16.0 0.0.3.255 host 172.16.180.120 eq 67
+#snmp
+access-list 102 permit udp 172.16.16.0 0.0.3.255 host 172.16.184.120 eq snmp
+#tftp
+access-list 102 permit udp 172.16.16.0 0.0.3.255 host 172.16.180.120 eq tftp
+#dns
+access-list 102 permit icmp 172.16.16.0 0.0.3.255 host 172.16.160.120
+#dhcp
+access-list 102 permit icmp 172.16.16.0 0.0.3.255 host 172.16.180.120
+#snmp
+access-list 102 permit icmp 172.16.16.0 0.0.3.255 host 172.16.184.120
+
+access-list 102 deny ip 172.16.16.0 0.0.3.255 172.16.112.0 0.0.1.255
+access-list 102 deny ip 172.16.16.0 0.0.3.255 172.16.32.0 0.0.3.255
+# Denegamos que la vlan 20 llegue a la vlan 10 - amarilla
+access-list 102 deny ip 172.16.16.0 0.0.3.255 172.16.128.0 0.0.1.255
+# Denegamos que la vlan 20 llegue a la vlan 30 - amarillo
+access-list 102 deny ip 172.16.16.0 0.0.3.255 172.16.64.0 0.0.3.255
+# Denegamos que la vlan 20 llegue a la vlan 10 - rojo
+access-list 102 deny ip 172.16.16.0 0.0.3.255 172.16.144.0 0.0.1.255
+# Denegamos que la vlan 20 llegue a la vlan 30 - rojo
+access-list 102 deny ip 172.16.16.0 0.0.3.255 172.16.96.0 0.0.3.255
+# Denegamos que la vlan 20  - verde (1)
+access-list 102 deny ip 172.16.16.0 0.0.3.255 172.16.160.0 0.0.0.127
+# Denegamos que la vlan 20  - verde (2)
+access-list 102 deny ip 172.16.16.0 0.0.3.255 172.16.180.0 0.0.3.255
+# Denegamos que la vlan 20 - verde (3)
+access-list 102 deny ip 172.16.16.0 0.0.3.255 172.16.184.0 0.0.3.255
+access-list 102 permit ip any any
+
+end 
+
+conf t
+
+int g0/1.20
+ip access-group 102 in
+
+-------------------------------ROUTER 3 .64.0 -------------------------------------------------
+conf t
+#dns
+access-list 103 permit udp 172.16.64.0 0.0.3.255 host 172.16.160.120 eq domain
+#dhcp
+access-list 103 permit udp 172.16.64.0 0.0.3.255 host 172.16.180.120 eq 67
+#snmp
+access-list 103 permit udp 172.16.64.0 0.0.3.255 host 172.16.184.120 eq snmp
+#tftp
+access-list 103 permit udp 172.16.64.0 0.0.3.255 host 172.16.180.120 eq tftp
+#dns
+access-list 103 permit icmp 172.16.64.0 0.0.3.255 host 172.16.160.120
+#dhcp
+access-list 103 permit icmp 172.16.64.0 0.0.3.255 host 172.16.180.120
+#snmp
+access-list 103 permit icmp 172.16.64.0 0.0.3.255 host 172.16.184.120
+
+access-list 103 deny ip 172.16.64.0 0.0.3.255 172.16.128.0 0.0.1.255
+access-list 103 deny ip 172.16.64.0 0.0.3.255 172.16.48.0 0.0.3.255
+# Denegamos que la vlan 30 llegue a la vlan 10 - azul
+access-list 103 deny ip 172.16.64.0 0.0.3.255 172.16.112.0 0.0.3.255
+# Denegamos que la vlan 30 llegue a la vlan 20 - azul
+access-list 103 deny ip 172.16.64.0 0.0.3.255 172.16.16.0 0.0.3.255
+# Denegamos que la vlan 30 llegue a la vlan 10 - rojo
+access-list 103 deny ip 172.16.64.0 0.0.3.255 172.16.144.0 0.0.1.255
+# Denegamos que la vlan 30 llegue a la vlan 20 - rojo
+access-list 103 deny ip 172.16.64.0 0.0.3.255 172.16.80.0 0.0.3.255
+# Denegamos que la vlan 30  - verde (1)
+access-list 103 deny ip 172.16.64.0 0.0.3.255 172.16.160.0 0.0.0.127
+# Denegamos que la vlan 30  - verde (2)
+access-list 103 deny ip 172.16.64.0 0.0.3.255 172.16.180.0 0.0.3.255
+# Denegamos que la vlan 30 - verde (3)
+access-list 103 deny ip 172.16.64.0 0.0.3.255 172.16.184.0 0.0.3.255
+access-list 103 permit ip any any
+
+end 
+
+conf t
+
+int g0/1.30
+ip access-group 103 in

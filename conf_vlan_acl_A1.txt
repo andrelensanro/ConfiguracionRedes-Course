@@ -1,0 +1,54 @@
+## configuracion de direccionamiento con VLSM
+## configuracion de las ips estaticas de los servidores
+--------------------COMANDOS NECESARIOS--------------------
+no int g0/1.16
+no int g0/1.30
+do show run
+show run
+show vlans brief
+no ip nat inside
+ip nat inside
+do show vlan
+---------------------SERVIDORES----------------------------
+SERVIDOR DNS 172.16.160.120/25 GW 172.16.160.1
+SERVIDOR DHCP-HTTP 172.16.180.230/22 GW 172.16.180.1
+SERVIDOR SNMP-TFTP 172.16.184.230/22 GW 172.16.184.1
+---------------------ROUTER 1------------------------------
+int g0/0
+no ip addr
+int g0/1
+no ip addr
+int g0/2
+no ip addr
+int g0/3
+no ip addr
+
+int g0/1
+ip addr 172.16.160.1 255.255.255.128
+no shutdown
+int g0/2
+ip addr 172.16.180.1 255.255.252.0
+no shutdown
+int g0/3
+ip addr 172.16.184.1 255.255.252.0
+no shutdown
+int g0/0
+ip addr 172.16.160.142 255.255.255.252
+no shutdown
+
+---------------------SWITCH 4---------------------
+# Por si las moscas no me acepta las vlan20
+int e0/0
+switchport trunk allowed vlan all
+switchport mode trunk
+
+---------------------PCs---------------------
+PC 11
+ip 172.16.180.5/22 172.16.180.1
+
+PC 12
+ip 172.16.184.5/22 172.16.184.1
+
+
+
+

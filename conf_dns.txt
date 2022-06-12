@@ -1,0 +1,60 @@
+---------------- SERVICIO DNS ----------------
+- const OJO. se desconfigura el up echo nameserver 
+- en /etc/network/interfaces 
+- y tambien en /etc/resolv.conf
+----------------------------------------------
+
+
+--------------------ROUTERS-------------------
+ip domain-lookup
+ip name-server 172.16.160.120
+
+
+--------------------SERVIDOR DNS-------------------
+#Configuracion del servidor
+nano /etc/network/interfaces
+#Descomentar la parte de asignacion estatica y dhcp queda comentada
+ip addres 172.16.160.120
+netmask 255.255.255.128
+gateway 172.16.160.1
+up echo nameserver 192.168.122.1 > /etc/resolv.conf
+
+#para que funcione el dhcp en las vpcs
+service dnsmasq restart
+
+#Cambiar esta configuracion
+nano /etc/dnsmasq.conf
+# If you want dnsmasq to listen for DHCP and DNS requests only on
+# specified interfaces (and the loopback) give the name of the
+# interface (eg eth0) here.
+# Repeat the line for more than one interface.
+interface=eth0
+#Tambien descomente esta linea
+listen-address=127.0.0.1
+
+
+nano /etc/hosts
+209.165.200.226 mi_escuela.com.lab mi_escuela
+172.16.160.120 dnsserver.com dnsserver
+74.125.230.82 www.google.es google.es
+
+#reiniciar los servicios y la red
+sudo /etc/init.d/dnsmasq restart
+
+--------------------PCs-------------------
+ip dns 172.16.160.120
+
+
+
+----------------------COMANDOS NECESARIOS Y DIRECTORIOS USADOS----------
+
+/etc/resolv.conf
+/etc/network/interfaces
+
+#para ver que atributos tiene el archivo -i inmutable
+lsattr /etc/resolv.conf
+#le quitamos la inmutabilidad a un fichero
+sudo chattr -i file1
+
+
+

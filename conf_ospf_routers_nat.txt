@@ -1,0 +1,76 @@
+#configuracion de routing con OSPF v2
+------------------COMANDO NECESARIOS--------------
+show ip ospf neighbor (adyacencia)
+show ip ospf database (crea la topologia)
+show ip router (tabla de routing)
+
+
+
+------------------ROUTER 2------------------
+conf t
+router ospf 1
+network 172.16.160.128 0.0.0.3 area 0
+network 172.16.112.0 0.0.1.255 area 0
+network 172.16.16.0 0.0.3.255 area 0
+network 172.16.32.0 0.0.3.255 area 0
+ip route 0.0.0.0 0.0.0.0 172.16.160.130
+------------------ROUTER 3------------------
+no router ospf 1
+conf t
+router ospf 1
+network 172.16.128.0 0.0.1.255 area 0
+network 172.16.48.0 0.0.3.255 area 0
+network 172.16.64.0 0.0.3.255 area 0
+network 172.16.160.132 0.0.0.3 area 0
+ip route 0.0.0.0 0.0.0.0 172.16.160.134
+
+------------------ROUTER 4------------------
+
+no router ospf 1
+conf t
+router ospf 1
+network 172.16.144.0 0.0.1.255 area 0
+network 172.16.80.0 0.0.3.255 area 0
+network 172.16.96.0 0.0.3.255 area 0
+network 172.16.160.136 0.0.0.3 area 0
+ip route 0.0.0.0 0.0.0.0 172.16.160.138
+
+------------------ROUTER 0 APLICACION DE NAT-OVERLOAD------------------
+
+no router ospf 1
+conf t
+router ospf 1
+network 172.16.160.132 0.0.0.3 area 0
+network 172.16.160.128 0.0.0.3 area 0
+network 172.16.160.136 0.0.0.3 area 0
+network 172.16.160.140 0.0.0.3 area 0
+network 192.198.0.0 0.0.0.255 area 0
+
+#Sale con una sola direccion publica toda la red
+ip nat inside source list 1 interface g0/0 overload
+access-list 1 permit 172.16.0.0 0.0.255.255
+
+int g0/0
+ip nat outside
+int g0/1
+ip nat inside
+int g0/2
+ip nat inside
+int g0/3
+ip nat inside
+int g0/4
+ip nat inside
+
+
+------------------ROUTER 1------------------
+
+no router ospf 1
+conf t
+router ospf 1
+network 172.16.160.0 0.0.0.127 area 0
+network 172.16.180.0 0.0.3.255 area 0
+network 172.16.184.0 0.0.3.255 area 0
+network 172.16.160.140 0.0.0.3 area 0
+ip router 0.0.0.0 0.0.0.0 172.16.160.141
+
+

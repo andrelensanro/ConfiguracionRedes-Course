@@ -1,0 +1,340 @@
+Rdos
+
+conf t
+no ip domain-lookup
+int g0/1
+ip addr 172.16.112.1 255.255.254.0
+no shut
+int g0/2
+ip addr 172.16.16.1 255.255.252.0
+no shut
+int g0/3
+ip addr 172.16.32.1 255.255.252.0
+no shut
+int g0/0
+ip addr 172.16.160.129 255.255.255.252
+no shut
+end
+wr
+
+conf t
+hostname Rdos
+
+conf t
+line con 0
+password letmein
+login
+
+line vyt 0 15
+password cisco
+login
+
+conf t
+router ospf 1
+network 172.16.112.0 0.0.1.255 area 0
+network 172.16.16.0 0.0.3.255 area 0
+network 172.16.32.0 0.0.3.255 area 0
+network 172.16.160.128 0.0.0.3 area 0
+
+sw_uno
+conf t
+int g0/0
+ip addr 172.16.112.2 255.255.254.0
+no shut
+int g0/1
+ip addr 172.16.112.3 255.255.254.0
+no shut
+end
+
+sw_dos
+conf t
+int g0/0
+ip addr 172.16.16.2 255.255.252.0
+no shut
+int g0/1
+ip addr 172.16.16.3 255.255.252.0
+no shut
+end
+
+sw_tres
+conf t
+int g0/0
+ip addr 172.16.32.2 255.255.252.0
+no shut
+int g0/1
+ip addr 172.16.32.3 255.255.252.0
+no shut
+end
+
+==============================
+Rtres
+
+conf t
+no ip domain-lookup
+int g0/1
+ip addr 172.16.128.1 255.255.254.0
+no shut
+int g0/2
+ip addr 172.16.48.1 255.255.252.0
+no shut
+int g0/3
+ip addr 172.16.64.1 255.255.252.0
+no shut
+int g0/0
+ip addr 172.16.160.133 255.255.255.252
+no shut
+end
+wr
+
+conf t
+hostname Rtres
+
+conf t
+line con 0
+password letmein
+login
+
+line vyt 0 15
+password cisco
+login
+
+conf t
+router ospf 1
+network 172.16.128.0 0.0.1.255 area 0
+network 172.16.48.0 0.0.3.255 area 0
+network 172.16.64.0 0.0.3.255 area 0
+network 172.16.160.132 0.0.0.3 area 0
+
+sw_uno
+conf t
+int g0/0
+ip addr 172.16.128.2 255.255.254.0
+no shut
+int g0/1
+ip addr 172.16.128.3 255.255.254.0
+no shut
+end
+
+sw_dos
+conf t
+int g0/0
+ip addr 172.16.48.2 255.255.252.0
+no shut
+int g0/1
+ip addr 172.16.48.3 255.255.252.0
+no shut
+end
+
+sw_tres
+conf t
+int g0/0
+ip addr 172.16.64.2 255.255.252.0
+no shut
+int g0/1
+ip addr 172.16.64.3 255.255.252.0
+no shut
+end
+
+=========================
+
+Rcuatro
+
+conf t
+no ip domain-lookup
+int g0/1
+ip addr 172.16.144.1 255.255.254.0
+ip nat inside
+no shut
+int g0/2
+ip addr 172.16.80.1 255.255.252.0
+ip nat inside
+no shut
+int g0/3
+ip addr 172.16.96.1 255.255.252.0
+ip nat inside
+no shut
+int g0/0
+ip addr 172.16.160.137 255.255.255.252
+no shut
+end
+wr
+
+conf t
+hostname Rcuatro
+
+conf t
+line con 0
+password letmein
+login
+
+line vyt 0 15
+password cisco
+login
+
+conf t
+router ospf 1
+network 172.16.144.0 0.0.1.255 area 0
+network 172.16.80.0 0.0.3.255 area 0
+network 172.16.96.0 0.0.3.255 area 0
+network 172.16.160.136 0.0.0.3 area 0
+
+sw_uno
+conf t
+int g0/0
+ip addr 172.16.144.2 255.255.254.0
+no shut
+int g0/1
+ip addr 172.16.144.3 255.255.254.0
+no shut
+end
+
+sw_dos
+conf t
+int g0/0
+ip addr 172.16.80.2 255.255.252.0
+no shut
+int g0/1
+ip addr 172.16.80.3 255.255.252.0
+no shut
+end
+
+sw_tres
+conf t
+int g0/0
+ip addr 172.16.96.2 255.255.252.0
+no shut
+int g0/1
+ip addr 172.16.96.3 255.255.252.0
+no shut
+end
+
+========================
+
+Rcero
+
+conf t
+no ip domain-lookup
+int g0/1
+ip addr 172.16.160.130 255.255.255.252
+no shut
+int g0/2
+ip addr 172.16.160.134 255.255.255.252
+no shut
+int g0/3
+ip addr 172.16.160.138 255.255.255.252
+no shut
+int g0/4
+ip addr 172.16.160.141 255.255.255.252
+no shut
+end
+wr
+
+conf t
+hostname Rcero
+
+conf t
+line con 0
+password letmein
+login
+
+line vyt 0 15
+password cisco
+login
+
+conf t
+router ospf 1
+network 172.16.160.128 0.0.0.3 area 0
+network 172.16.160.132 0.0.0.3 area 0
+network 172.16.160.136 0.0.0.3 area 0
+network 172.16.160.140 0.0.0.3 area 0
+
+===========================
+
+Runo
+
+conf t
+no ip domain-lookup
+int g0/0
+ip addr 172.16.160.142 255.255.255.252
+no shut
+int g0/1
+ip addr 172.16.160.1 255.255.255.128
+no shut
+end
+wr
+
+conf t
+hostname Runo
+
+conf t
+line con 0
+password letmein
+login
+
+line vyt 0 15
+password cisco
+login
+
+conf t
+router ospf 1
+network 172.16.160.140 0.0.0.3 area 0
+network 172.16.160.0 0.0.0.127 area 0
+
+sw_uno
+conf t
+int g0/0
+ip addr 172.16.160.2 255.255.255.128
+no shut
+int g0/1
+ip addr 172.16.160.3 255.255.255.128
+no shut
+end
+
+==================================
+Router dos
+
+particionar la interfaz que conecta con el sw
+
+int g0/1
+no ip addr 
+
+exit
+
+int g0/1.10
+encapsulation dot1Q 10
+ip addr 172.16.112.1 255.255.254.0
+ip nat inside
+no shut
+int g0/1.20
+encapsulation dot1Q 10
+ip addr 172.16.16.1 255.255.252.0
+ip nat inside
+no shut
+int g0/1.30
+encapsulation dot1Q 10
+ip addr 172.16.32.1 255.255.252.0
+ip nat inside
+no shut
+
+SW para dos
+
+int fa0/1
+switchport mode access
+switchport access vlan 20
+
+SW para dos con enlace troncal
+int f0/0
+switchport trunk encapsulation dot1q
+switchport mode trunk
+switchport trunk allowed vlan all
+
+
+
+ 
+
+
+
+
+
+
+

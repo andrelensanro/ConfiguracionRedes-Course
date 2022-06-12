@@ -1,0 +1,38 @@
+## configuracion de direccionamiento con VLSM
+## configuracion de las ips estaticas de los servidores
+--------------------COMANDOS NECESARIOS--------------------
+no int g0/1.16
+no int g0/1.30
+do show run
+show run
+show vlans brief
+no ip nat inside
+ip nat inside
+do show vlan
+---------------------SERVIDORES----------------------------
+SERVIDOR DNS 172.16.160.120/25 GW 172.16.160.1
+SERVIDOR DHCP-HTTP 172.16.180.230/22 GW 172.16.180.1
+SERVIDOR SNMP-TFTP 172.16.184.230/22 GW 172.16.184.1
+---------------------ROUTER 0------------------------------
+
+
+int g0/0
+ip addr dhcp
+no shu	
+int g0/1
+ip addr 172.16.160.130 255.255.255.252
+no shu
+int g0/2
+ip addr 172.16.160.134 255.255.255.252
+no shu
+int g0/3
+ip addr 172.16.160.138 255.255.255.252
+no shu
+int g0/4
+ip addr 172.16.160.141 255.255.255.252
+no shu
+
+
+
+
+
